@@ -16,14 +16,21 @@
     #instructions a { color: #7dd3fc; }
   </style>
   <script>
-    // Lets you rotate the model by dragging your finger (or mouse) across the screen.
+    // Rotate the model by dragging. Includes momentum: flick and it keeps
+    // spinning, gradually slowing down (like a real object with inertia).
     AFRAME.registerComponent('drag-rotate', {
       init: function () {
         this.rotY = 0;
         this.rotX = 0;
+        this.velY = 0;   // current spin speed (deg/frame)
+        this.velX = 0;
         this.isDragging = false;
         this.lastX = 0;
         this.lastY = 0;
+        this.lastMoveTime = 0;
+
+        this.sensitivity = 0.4;   // how much rotation per pixel dragged
+        this.damping = 0.95;      // momentum decay per frame (closer to 1 = spins longer)
 
         const el = this.el;
         const canvas = this.el.sceneEl.canvas;
@@ -32,28 +39,40 @@
           this.isDragging = true;
           this.lastX = x;
           this.lastY = y;
+          this.velX = 0;
+          this.velY = 0;
         };
+
         const moveDrag = (x, y) => {
           if (!this.isDragging) return;
           const deltaX = x - this.lastX;
           const deltaY = y - this.lastY;
-          this.rotY += deltaX * 0.5;
-          this.rotX += deltaY * 0.5;
-          el.setAttribute('rotation', { x: this.rotX, y: this.rotY, z: 0 });
+
+          const spinY = deltaX * this.sensitivity;
+          const spinX = deltaY * this.sensitivity;
+
+          this.rotY += spinY;
+          this.rotX += spinX;
+
+          // remember velocity so we can carry momentum after release
+          this.velY = spinY;
+          this.velX = spinX;
+
           this.lastX = x;
           this.lastY = y;
         };
+
         const endDrag = () => { this.isDragging = false; };
 
         // Touch (mobile)
         canvas.addEventListener('touchstart', (e) => {
           const t = e.touches[0];
           startDrag(t.clientX, t.clientY);
-        });
+        }, { passive: true });
         canvas.addEventListener('touchmove', (e) => {
           const t = e.touches[0];
           moveDrag(t.clientX, t.clientY);
-        });
+        }, { passive: true });
         canvas.addEventListener('touchend', endDrag);
 
         // Mouse (desktop testing)
@@ -61,6 +80,17 @@
         canvas.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
         canvas.addEventListener('mouseup', endDrag);
         canvas.addEventListener('mouseleave', endDrag);
+      },
+
+      tick: function () {
+        if (!this.isDragging) {
+          // apply momentum, decaying each frame
+          this.rotY += this.velY;
+          this.rotX += this.velX;
+          this.velY *= this.damping;
+          this.velX *= this.damping;
+        }
+        this.el.setAttribute('rotation', { x: this.rotX, y: this.rotY, z: 0 });
       }
     });
   </script>
