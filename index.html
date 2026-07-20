@@ -49,7 +49,7 @@
           const deltaY = y - this.lastY;
 
           const spinY = deltaX * this.sensitivity;
-          const spinX = deltaY * this.sensitivity;
+          const spinX = -deltaY * this.sensitivity;
 
           this.rotY += spinY;
           this.rotX += spinX;
