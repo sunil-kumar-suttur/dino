@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AR 3D Dinosaur Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; font-family: sans-serif; }
+    #instructions {
+      position: absolute; top: 10px; left: 10px; right: 10px;
+      background: rgba(0,0,0,0.7); color: #fff; padding: 10px 14px;
+      border-radius: 8px; font-size: 14px; z-index: 999;
+    }
+    #instructions a { color: #7dd3fc; }
+  </style>
+</head>
+<body>
+
+  <div id="instructions">
+    🦖 Point your camera at the dinosaur target image.
+    <a href="din-target.jpg" target="_blank">
+      Open the marker image here
+    </a>
+  </div>
+
+  <a-scene
+    mindar-image="imageTargetSrc: targets.mind;"
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: true"
+  >
+    <a-assets>
+      <!-- Make sure din.glb sits in the same folder as this HTML file when you host it -->
+      <a-asset-item id="dinoModel" src="din.glb"></a-asset-item>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-light type="ambient" color="#fff" intensity="0.6"></a-light>
+    <a-light type="directional" color="#fff" intensity="0.8" position="1 1 1"></a-light>
+
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-gltf-model
+        src="#dinoModel"
+        position="0 0 0.1"
+        scale="0.5 0.5 0.5"
+        rotation="0 0 0"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear"
+      ></a-gltf-model>
+    </a-entity>
+  </a-scene>
+
+</body>
+</html>
