@@ -15,6 +15,56 @@
     }
     #instructions a { color: #7dd3fc; }
   </style>
+  <script>
+    // Lets you rotate the model by dragging your finger (or mouse) across the screen.
+    AFRAME.registerComponent('drag-rotate', {
+      init: function () {
+        this.rotY = 0;
+        this.rotX = 0;
+        this.isDragging = false;
+        this.lastX = 0;
+        this.lastY = 0;
+
+        const el = this.el;
+        const canvas = this.el.sceneEl.canvas;
+
+        const startDrag = (x, y) => {
+          this.isDragging = true;
+          this.lastX = x;
+          this.lastY = y;
+        };
+        const moveDrag = (x, y) => {
+          if (!this.isDragging) return;
+          const deltaX = x - this.lastX;
+          const deltaY = y - this.lastY;
+          this.rotY += deltaX * 0.5;
+          this.rotX += deltaY * 0.5;
+          el.setAttribute('rotation', { x: this.rotX, y: this.rotY, z: 0 });
+          this.lastX = x;
+          this.lastY = y;
+        };
+        const endDrag = () => { this.isDragging = false; };
+
+        // Touch (mobile)
+        canvas.addEventListener('touchstart', (e) => {
+          const t = e.touches[0];
+          startDrag(t.clientX, t.clientY);
+        });
+        canvas.addEventListener('touchmove', (e) => {
+          const t = e.touches[0];
+          moveDrag(t.clientX, t.clientY);
+        });
+        canvas.addEventListener('touchend', endDrag);
+
+        // Mouse (desktop testing)
+        canvas.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+        canvas.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+        canvas.addEventListener('mouseup', endDrag);
+        canvas.addEventListener('mouseleave', endDrag);
+      }
+    });
+  </script>
+
 </head>
 <body>
 
@@ -46,9 +96,9 @@
       <a-gltf-model
         src="#dinoModel"
         position="0 0 0.1"
-        scale="0.5 0.5 0.5"
+        scale="1.2 1.2 1.2"
         rotation="0 0 0"
-        animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear"
+        drag-rotate
       ></a-gltf-model>
     </a-entity>
   </a-scene>
