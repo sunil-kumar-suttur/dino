@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>AR Diagnostic Test</title>
+  <title>AR 3D Dinosaur Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -19,45 +19,11 @@
 <body>
 
   <div id="instructions">
-    🩺 Diagnostic test: custom targets.mind + procedural heart (no GLB).
+    🦖 Point your camera at the dinosaur target image.
     <a href="din-target.jpg" target="_blank">
       Open the marker image here
     </a>
   </div>
-
-  <script>
-    // Procedural heart geometry — no external file dependency, so if this
-    // doesn't show up, the problem is target detection, not the 3D model.
-    AFRAME.registerGeometry('heart', {
-      schema: {
-        depth: { type: 'number', default: 2 },
-        scale: { type: 'number', default: 0.05 }
-      },
-      init: function (data) {
-        const shape = new THREE.Shape();
-        shape.moveTo(0, 0);
-        shape.bezierCurveTo(0, -3, -6, -3, -6, 2);
-        shape.bezierCurveTo(-6, 6, 0, 8, 0, 12);
-        shape.bezierCurveTo(0, 8, 6, 6, 6, 2);
-        shape.bezierCurveTo(6, -3, 0, -3, 0, 0);
-
-        const extrudeSettings = {
-          depth: data.depth,
-          bevelEnabled: true,
-          bevelThickness: 1,
-          bevelSize: 1,
-          bevelSegments: 3,
-          curveSegments: 24
-        };
-
-        let geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        geometry.center();
-        geometry.scale(data.scale, data.scale, data.scale);
-        geometry.rotateZ(Math.PI);
-        this.geometry = geometry;
-      }
-    });
-  </script>
 
   <a-scene
     mindar-image="imageTargetSrc: targets.mind;"
@@ -66,19 +32,24 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: true"
   >
+    <a-assets>
+      <!-- Make sure din.glb sits in the same folder as this HTML file when you host it -->
+      <a-asset-item id="dinoModel" src="din.glb"></a-asset-item>
+    </a-assets>
+
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <a-light type="ambient" color="#fff" intensity="0.6"></a-light>
     <a-light type="directional" color="#fff" intensity="0.8" position="1 1 1"></a-light>
 
     <a-entity mindar-image-target="targetIndex: 0">
-      <a-entity
-        geometry="primitive: heart"
-        material="color: #e0245e; roughness: 0.35; metalness: 0.1"
-        position="0 0 0.2"
-        rotation="90 0 0"
-        animation="property: scale; from: 1 1 1; to: 1.15 1.15 1.15; dur: 500; dir: alternate; loop: true; easing: easeInOutSine"
-      ></a-entity>
+      <a-gltf-model
+        src="#dinoModel"
+        position="0 0 0.1"
+        scale="0.5 0.5 0.5"
+        rotation="0 0 0"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear"
+      ></a-gltf-model>
     </a-entity>
   </a-scene>
 
